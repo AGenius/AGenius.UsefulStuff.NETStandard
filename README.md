@@ -8,3 +8,5 @@ I always find that I re-use so much useful and reused code so I have decided to 
 I have added many usefull helpers and Utilites too
 
 Full Comments and Documentation to follow
+
+**This repo is a work in progress while I re-build it **
