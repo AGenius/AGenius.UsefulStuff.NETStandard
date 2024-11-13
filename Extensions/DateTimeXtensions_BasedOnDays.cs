@@ -95,7 +95,7 @@ namespace AGenius.UsefulStuff
         /// <param name="lastDay">Last day in the time interval</param>
         /// <param name="bankHolidays">List of bank holidays excluding weekends</param>
         /// <returns>Number of business days during the 'span'</returns>
-        public static int BusinessDays(this DateTime lastDay , DateTime firstDay, List<DateTime> bankHolidays = null)
+        public static int BusinessDays(this DateTime lastDay , DateTime firstDay, List<DateTime>? bankHolidays = null)
         {
             firstDay = firstDay.Date;
             lastDay = lastDay.Date;

@@ -9,8 +9,10 @@ using System.DirectoryServices.AccountManagement;
 using AGenius.UsefulStuff.Helpers.ActiveDirectory.Model;
 using System.Threading.Tasks;
 
+//[assembly:SupportedOSPlatform("windows")]
 namespace AGenius.UsefulStuff.Helpers.ActiveDirectory
 {
+    /// <summary>Only usable in Windows</summary>
     public class ADHelper
     {
         public static bool IsInGroup(string principal, string application)
@@ -24,9 +26,9 @@ namespace AGenius.UsefulStuff.Helpers.ActiveDirectory
         /// <param name="application"></param>
         /// <param name="ADPathOverride"></param>
         /// <returns></returns>
-        public static bool IsInGroup(string principal, string application, string ADPathOverride)
+        public static bool IsInGroup(string principal, string application, string? ADPathOverride)
         {
-            string group = ConfigurationManager.AppSettings[application];
+            string? group = ConfigurationManager.AppSettings[application];
             List<string> userGroups = GetUserGroups(principal, ADPathOverride);
 
             foreach (string grp in userGroups)
@@ -55,7 +57,7 @@ namespace AGenius.UsefulStuff.Helpers.ActiveDirectory
                     return pc.ValidateCredentials(userName, password);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -89,18 +91,18 @@ namespace AGenius.UsefulStuff.Helpers.ActiveDirectory
 
             return false;
         }
-        public static string GetUserName(string principal)
+        public static string? GetUserName(string principal)
         {
             return GetUserName(principal, null);
         }
-        public static string GetUserName(string principal, string ADPathOverride)
+        public static string? GetUserName(string principal, string? ADPathOverride)
         {
             if (!String.IsNullOrEmpty(principal))
             {
-                DirectoryEntry theUser = GetDirectoryEntry(principal, ADPathOverride);
+                DirectoryEntry? theUser = GetDirectoryEntry(principal, ADPathOverride);
                 if (theUser != null)
                 {
-                    return theUser.Properties["displayName"][0].ToString();
+                    return theUser?.Properties["displayName"][0].ToString();
                 }
                 else
                 {
@@ -121,11 +123,11 @@ namespace AGenius.UsefulStuff.Helpers.ActiveDirectory
         {
             return GetUserGroupNames(principal, null);
         }
-        public static List<string> GetUserGroupNames(string principal, string ADPathOverride)
+        public static List<string> GetUserGroupNames(string principal, string? ADPathOverride)
         {
             if (!String.IsNullOrEmpty(principal))
             {
-                DirectoryEntry theUser = GetDirectoryEntry(principal, ADPathOverride);
+                DirectoryEntry? theUser = GetDirectoryEntry(principal, ADPathOverride);
                 if (theUser != null)
                 {
                     theUser.RefreshCache(new string[] { "tokenGroups" });
@@ -149,16 +151,16 @@ namespace AGenius.UsefulStuff.Helpers.ActiveDirectory
                 return new List<string> { "Unknown" };
             }
         }
-        public static List<string> GetUserGroups(string principal, string ADPathOverride)
+        public static List<string> GetUserGroups(string principal, string? ADPathOverride)
         {
             if (!String.IsNullOrEmpty(principal))
             {
-                DirectoryEntry theUser = GetDirectoryEntry(principal, ADPathOverride);
+                DirectoryEntry? theUser = GetDirectoryEntry(principal, ADPathOverride);
                 if (theUser != null)
                 {
-                    theUser.RefreshCache(new string[] { "tokenGroups" });
+                    theUser?.RefreshCache(new string[] { "tokenGroups" });
 
-                    IdentityReferenceCollection irc = ExpandTokenGroups(theUser).Translate(typeof(NTAccount));
+                    IdentityReferenceCollection? irc = ExpandTokenGroups(theUser).Translate(typeof(NTAccount));
 
                     List<string> userGroups = new List<string>();
 
@@ -185,16 +187,16 @@ namespace AGenius.UsefulStuff.Helpers.ActiveDirectory
             }
         }
 
-        private static DirectoryEntry GetDirectoryEntry(string principal)
+        private static DirectoryEntry? GetDirectoryEntry(string principal)
         {
             return GetDirectoryEntry(principal, null);
         }
-        private static DirectoryEntry GetDirectoryEntry(string principal, string ADPathOverride)
+        private static DirectoryEntry? GetDirectoryEntry(string principal, string? ADPathOverride)
         {
-            string domain = "";
+            string? domain = "";
             if (string.IsNullOrEmpty(ADPathOverride))
             {
-                domain = ConfigurationManager.AppSettings["ADPath"];
+                domain = ConfigurationManager.AppSettings["ADPath"] ?? "";
             }
             else
             {
@@ -204,22 +206,22 @@ namespace AGenius.UsefulStuff.Helpers.ActiveDirectory
             string filter = string.Format("(&(ObjectClass={0})(sAMAccountName={1}))", "person", principal);
             string[] properties = new string[] { "fullname" };
 
-            DirectoryEntry adRoot = null;
+            DirectoryEntry? adRoot = null;
 
             adRoot = new DirectoryEntry("LDAP://" + domain, null, null, AuthenticationTypes.Secure);
 
-            DirectorySearcher searcher = new DirectorySearcher(adRoot);
+            DirectorySearcher? searcher = new DirectorySearcher(adRoot);
             searcher.SearchScope = SearchScope.Subtree;
             searcher.ReferralChasing = ReferralChasingOption.All;
             searcher.PropertiesToLoad.AddRange(properties);
             searcher.Filter = filter;
-            SearchResult result = null;
+            SearchResult? result = null;
             try
             {
                 result = searcher.FindOne();
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
             }
@@ -227,32 +229,32 @@ namespace AGenius.UsefulStuff.Helpers.ActiveDirectory
             if (result == null)
                 return null;
 
-            DirectoryEntry theUser = result.GetDirectoryEntry();
+            DirectoryEntry? theUser = result?.GetDirectoryEntry();
 
             return theUser;
         }
 
 
-        private static IdentityReferenceCollection ExpandTokenGroups(DirectoryEntry user)
+        private static IdentityReferenceCollection ExpandTokenGroups(DirectoryEntry? user)
         {
-            user.RefreshCache(new string[] { "tokenGroups" });
+            user?.RefreshCache(new string[] { "tokenGroups" });
 
-            IdentityReferenceCollection irc = new IdentityReferenceCollection();
+            IdentityReferenceCollection? irc = new IdentityReferenceCollection();
 
-            foreach (byte[] sidBytes in user.Properties["tokenGroups"])
+            foreach (byte[]? sidBytes in user?.Properties["tokenGroups"])
             {
                 irc.Add(new SecurityIdentifier(sidBytes, 0));
             }
 
             return irc;
         }
-        private static List<string> ExpandGroupNames(DirectoryEntry user)
+        private static List<string> ExpandGroupNames(DirectoryEntry? user)
         {
-            user.RefreshCache(new string[] { "memberOf" });
+            user?.RefreshCache(new string[] { "memberOf" });
 
             //IdentityReferenceCollection irc = new IdentityReferenceCollection();
             List<String> Items = new List<string>();
-            foreach (string name in user.Properties["memberOf"])
+            foreach (string? name in user?.Properties["memberOf"])
             {
                 //irc.Add(name);
                 string[] splitup = name.Split(',');
@@ -262,13 +264,13 @@ namespace AGenius.UsefulStuff.Helpers.ActiveDirectory
             return Items;
         }
 
-        public static List<string> GetLocalUserList()
+        public static List<string>? GetLocalUserList()
         {
-            DirectoryEntry directoryEntry = new DirectoryEntry("WinNT://" + Environment.MachineName);
+            DirectoryEntry? directoryEntry = new DirectoryEntry("WinNT://" + Environment.MachineName);
             List<string> userNames = new List<string>();
-            foreach (DirectoryEntry child in directoryEntry.Children)
+            foreach (DirectoryEntry? child in directoryEntry?.Children)
             {
-                if (child.SchemaClassName == "User")
+                if (child !=null && child?.SchemaClassName == "User")
                 {
                     userNames.Add(child.Name);
                 }
@@ -276,32 +278,32 @@ namespace AGenius.UsefulStuff.Helpers.ActiveDirectory
             return userNames;
         }
 
-        public static List<string> GetADUserList(string domainName, string adUserName, string adPassword, string GroupName = null)
+        public static List<string>? GetADUserList(string domainName, string adUserName, string adPassword, string? GroupName = null)
         {
             List<string> userNames = new List<string>();
-            PrincipalContext principalContext = new PrincipalContext(ContextType.Domain, domainName, adUserName, adPassword);
-            GroupPrincipal group = GroupPrincipal.FindByIdentity(principalContext, GroupName);
+            PrincipalContext? principalContext = new PrincipalContext(ContextType.Domain, domainName, adUserName, adPassword);
+            GroupPrincipal? group = GroupPrincipal.FindByIdentity(principalContext, GroupName);
 
-            foreach (Principal principal in group.Members)
+            foreach (Principal? principal in group.Members)
             {
-                string name = principal.Name;
+                string? name = principal?.Name;
                 userNames.Add(name);
             }
 
             return userNames;
         }
-        public static List<ADUser> GetADUsers(string domainName, string adUserName, string adPassword, string GroupName = null)
+        public static List<ADUser> GetADUsers(string domainName, string adUserName, string adPassword, string? GroupName = null)
         {
             List<ADUser> userNames = new List<ADUser>();
-            PrincipalContext principalContext = new PrincipalContext(ContextType.Domain, domainName, adUserName, adPassword);
-            GroupPrincipal group = GroupPrincipal.FindByIdentity(principalContext, GroupName);
+            PrincipalContext? principalContext = new PrincipalContext(ContextType.Domain, domainName, adUserName, adPassword);
+            GroupPrincipal? group = GroupPrincipal.FindByIdentity(principalContext, GroupName);
 
-            foreach (UserPrincipal principal in group.Members)
+            foreach (UserPrincipal? principal in group.Members)
             {
-                ADUser userItem = new ADUser();
-                userItem.AccountName = principal.SamAccountName;
-                userItem.DisplayName = principal.Name;
-                userItem.Email = principal.EmailAddress;
+                ADUser? userItem = new ADUser();
+                userItem.AccountName = principal?.SamAccountName;
+                userItem.DisplayName = principal?.Name;
+                userItem.Email = principal?.EmailAddress;
 
                 userNames.Add(userItem);
 

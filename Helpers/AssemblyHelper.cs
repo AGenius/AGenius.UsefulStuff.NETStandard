@@ -8,11 +8,11 @@ namespace AGenius.UsefulStuff.Helpers
 {
     public static class AssemblyHelper
     {
-        public static string CallingAssemblyName;
-        public static Assembly EntryAssembly;
-        private static NameValueCollection _EntryAssemblyAttribCollection;
-        public static string EntryAssemblyName;
-        public static string ExecutingAssemblyName;
+        public static string? CallingAssemblyName;
+        public static Assembly? EntryAssembly;
+        private static NameValueCollection? _EntryAssemblyAttribCollection;
+        public static string? EntryAssemblyName;
+        public static string? ExecutingAssemblyName;
 
         public static NameValueCollection EntryAssemblyAttribCollection
         {
@@ -26,7 +26,7 @@ namespace AGenius.UsefulStuff.Helpers
             }
         }
         /// <summary>returns string name / string value pair of all attribs for specified assembly</summary>
-        public static NameValueCollection AssemblyAttributes(Assembly a)
+        public static NameValueCollection AssemblyAttributes(Assembly? a)
         {
             string TypeName;
             string Name;
@@ -171,11 +171,11 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="a">Assembly to get build date for</param>
         /// <param name="ForceFileDate">Don't attempt to use the build number to calculate the date</param>
         /// <returns>DateTime this assembly was last built</returns>
-        public static DateTime AssemblyBuildDate(Assembly a, bool ForceFileDate)
+        public static DateTime AssemblyBuildDate(Assembly? a, bool? ForceFileDate)
         {
             Version AssemblyVersion = a.GetName().Version;
             DateTime dt;
-            if (ForceFileDate)
+            if (ForceFileDate.HasValue && ForceFileDate.Value)
             {
                 dt = AssemblyLastWriteTime(a);
             }
@@ -196,7 +196,7 @@ namespace AGenius.UsefulStuff.Helpers
 
         /// <summary> exception-safe retrieval of LastWriteTime for this assembly.</summary>
         /// <returns>File.GetLastWriteTime, or DateTime.MaxValue if exception was encountered.</returns>
-        public static DateTime AssemblyLastWriteTime(Assembly a)
+        public static DateTime AssemblyLastWriteTime(Assembly? a)
         {
             try
             {
@@ -222,7 +222,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <summary>
         /// retrieves a cached value from the entry assembly attribute lookup collection
         /// </summary>
-        public static string EntryAssemblyAttrib(string strName)
+        public static string EntryAssemblyAttrib(string? strName)
         {
             if (EntryAssemblyAttribCollection[strName] == null)
             {

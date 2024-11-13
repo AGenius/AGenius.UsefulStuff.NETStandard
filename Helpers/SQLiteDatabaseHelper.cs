@@ -165,7 +165,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="keyFieldName">The Key FieldName</param>
         /// <param name="operatorType">Comparison Operator - Default is Equals</param>
         /// <returns>The Entity record requested or null</returns>
-        public TENTITY ReadRecord<TENTITY>(string keyFieldName, string fieldValue, string operatorType = "=") where TENTITY : class
+        public TENTITY? ReadRecord<TENTITY>(string keyFieldName, string fieldValue, string operatorType = "=") where TENTITY : class
         {
             try
             {
@@ -207,7 +207,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="fieldValue"><see cref="int"/> representing the ID of the required record</param>
         /// <param name="operatorType">Comparison Operator - Default is Equals</param>
         /// <returns>The Entity record requested or null</returns>
-        public TENTITY ReadRecord<TENTITY>(string keyFieldName, int fieldValue, string operatorType = "=") where TENTITY : class
+        public TENTITY? ReadRecord<TENTITY>(string keyFieldName, int fieldValue, string operatorType = "=") where TENTITY : class
         {
             try
             {
@@ -246,7 +246,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <typeparam name="TENTITY">Entity Object type</typeparam>
         /// <param name="Where">criteria</param>
         /// <returns>The Entity record requested or null</returns>
-        public TENTITY ReadRecordWithWhere<TENTITY>(string Where = "")
+        public TENTITY? ReadRecordWithWhere<TENTITY>(string Where = "")
             where TENTITY : class
         {
             try
@@ -372,7 +372,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="tableName">Table or View name to use</param>
         /// <param name="Criteria">The Where criteria (optional)</param>
         /// <remarks>WHERE statement is not required in the Criteria specified</remarks>
-        public object DLookup(string FieldName, string tableName, string Criteria = "")
+        public object? DLookup(string FieldName, string tableName, string Criteria = "")
         {
             try
             {
@@ -588,7 +588,7 @@ namespace AGenius.UsefulStuff.Helpers
 
         /// <summary>Execute an SQL Statement </summary>
         /// <param name="sqlCmd">String holding the SQL Command</param>
-        public string ExecuteScalar(string sqlCmd)
+        public string? ExecuteScalar(string sqlCmd)
         {
             SQLiteConnection cnn = new SQLiteConnection(DBConnectionString);
             cnn.Open();
@@ -763,7 +763,7 @@ namespace AGenius.UsefulStuff.Helpers
                 return HasRows;
             }
 
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }

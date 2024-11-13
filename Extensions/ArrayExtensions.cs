@@ -20,7 +20,7 @@ namespace AGenius.UsefulStuff
         /// <returns>
         /// The element found in the array, or the default element.
         /// </returns>
-        public static T SafeGetElement<T>(this T[] arrayOfValues, int arrayLocation, T defaultElement = default, Func<T, T> additionalAction = null)
+        public static T SafeGetElement<T>(this T[] arrayOfValues, int arrayLocation, T defaultElement = default, Func<T, T>? additionalAction = null)
         {
             var result = defaultElement;
 

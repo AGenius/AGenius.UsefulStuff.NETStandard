@@ -21,7 +21,7 @@
         /// <param name="obj"></param>
         /// <param name="propName">String representing the property name</param>
         /// <returns></returns>
-        public static object GetPropertyValue(this object obj, string propName)
+        public static object? GetPropertyValue(this object obj, string propName)
         {
             var ObjType = obj.GetType().GetProperty(propName, System.Reflection.BindingFlags.IgnoreCase |
                                                        System.Reflection.BindingFlags.Public |

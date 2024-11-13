@@ -1,17 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net8.0-windows;netstandard2.1;netstandard2.1-windows;net48;net48-windows;net481;net481-windows;net7.0;net7.0-windows;net8.0;net8.0-windows;net7.0-windows;net7.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;netstandard2.1;net48;net481</TargetFrameworks>
     <Nullable>enable</Nullable>
-	<LangVersion>8.0</LangVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <COMReference Include="{d37e2a3e-8545-3a39-9f4f-31827c9124ab}">
-      <WrapperTool>tlbimp</WrapperTool>
-      <VersionMinor>4</VersionMinor>
-      <VersionMajor>2</VersionMajor>
-      <Guid>d37e2a3e-8545-3a39-9f4f-31827c9124ab</Guid>
-    </COMReference>
-  </ItemGroup>
   <ItemGroup>
     <Folder Include="Extensions\" />
     <Folder Include="Helpers\" />
@@ -25,7 +16,7 @@
     <PackageReference Include="SQLitePCLRaw.core" Version="2.1.8" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
     <PackageReference Include="System.Data.SQLite.x64" Version="1.0.118" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.6.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.6.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
     <PackageReference Include="System.Data.Odbc" Version="8.0.0" />

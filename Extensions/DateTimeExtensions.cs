@@ -77,7 +77,7 @@ namespace AGenius.UsefulStuff
             // Calculate the final result using all the above calculated values
             return start.AddDays(wholeDays + weekends * 2).Add(remainder);
         }
-        public static DateTime AddWorkDays(this DateTime date, int workingDays, List<DateTime> dates = null)
+        public static DateTime AddWorkDays(this DateTime date, int workingDays, List<DateTime>? dates = null)
         {
             int direction = workingDays < 0 ? -1 : 1;
             DateTime newDate = date;
@@ -108,7 +108,7 @@ namespace AGenius.UsefulStuff
         /// <param name="date">DateTime to be checked.</param>
         /// <param name="dates">List of dates to check</param>
         /// <returns>True if the given day is a holiday, false otherwise.</returns>
-        public static bool IsAHoliday(this DateTime date, List<DateTime> dates = null)
+        public static bool IsAHoliday(this DateTime date, List<DateTime>? dates = null)
         {
             if (dates != null && dates.Count > 0)
             {

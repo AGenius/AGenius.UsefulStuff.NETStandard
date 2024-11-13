@@ -14,7 +14,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// Exposed property to allow the override of the location the temp file list file is stored.
         /// </summary>
         /// <remarks>The default will be the same location as the EXE but this might be a read only location So overide this value to specify the alternate.</remarks>
-        public static string filesListPath { get; set; } = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        public static string? filesListPath { get; set; } = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         private static string GetUsedFilesListFilename()
         {
             return $"{filesListPath}\\{Assembly.GetEntryAssembly().GetName().Name}{UserFilesListFilenamePrefix}";        

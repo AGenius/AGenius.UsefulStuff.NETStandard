@@ -7,16 +7,16 @@ namespace AGenius.UsefulStuff
     #region Image Creation
     public class ImageBuildProperties
     {
-        public string ImageFileName { get; set; }
-        public System.Drawing.Imaging.ImageFormat OutputImageFormat { get; set; } = System.Drawing.Imaging.ImageFormat.Png;
-        public Image StartingImage { get; set; } = null;
-        public bool isTransparent { get; set; } = false;
-        public Color TransparentColour { get; set; } = Color.White;
-        public int Height { get; set; }
-        public int Width { get; set; }
+        public string? ImageFileName { get; set; }
+        public System.Drawing.Imaging.ImageFormat? OutputImageFormat { get; set; } = System.Drawing.Imaging.ImageFormat.Png;
+        public Image? StartingImage { get; set; } = null;
+        public bool? isTransparent { get; set; } = false;
+        public Color? TransparentColour { get; set; } = Color.White;
+        public int? Height { get; set; }
+        public int? Width { get; set; }
 
-        public ImageBoxProperties boxProperties;
-        public ImageTextProperties textProperties;
+        public ImageBoxProperties? boxProperties;
+        public ImageTextProperties? textProperties;
 
         public ImageBuildProperties()
         {

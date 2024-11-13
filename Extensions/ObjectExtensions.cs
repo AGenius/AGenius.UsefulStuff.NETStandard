@@ -102,21 +102,21 @@ namespace AGenius.UsefulStuff
         public class Variance
         {
             /// <summary>Name of the Property</summary>
-            public string PropertyName { get; set; }
+            public string? PropertyName { get; set; } 
             /// <summary>The property Type <see cref="System.Type"/></summary>
-            public System.Type PropertyType { get; set; }
+            public System.Type? PropertyType { get; set; }
             /// <summary>True if the field is the Key field (Used by Dapper) <see cref="Dapper.Contrib.Extensions.KeyAttribute"/></summary>
             public bool isKeyField { get; set; }
             /// <summary>The Properties Category. Defaults to Misc <see cref="System.ComponentModel.CategoryAttribute"/></summary>
-            public string PropertyCategory { get; set; }  
+            public string? PropertyCategory { get; set; }  
             /// <summary>The Display name of the Property <see cref="System.ComponentModel.DisplayNameAttribute"/></summary>
-            public string PropertyDisplayName { get; set; }
+            public string? PropertyDisplayName { get; set; }
             /// <summary>The Properties Description <see cref="System.ComponentModel.DescriptionAttribute"/></summary>
-            public string PropertyDescription { get; set; } 
+            public string? PropertyDescription { get; set; } 
             /// <summary>The Old Value of the property</summary>
-            public object OldValue { get; set; }
+            public object? OldValue { get; set; }
             /// <summary>The New Value of the property</summary>
-            public object NewValue { get; set; }
+            public object? NewValue { get; set; }
         }
     }
     #endregion

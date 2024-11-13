@@ -21,7 +21,7 @@ namespace AGenius.UsefulStuff.Helpers
         {
             get; set;
         }
-        
+
         /// <summary>Initializes a new instance of the <see cref="ODBCDatabaseHelper"/> class </summary>
         public ODBCDatabaseHelper()
         {
@@ -158,7 +158,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="keyFieldName">The Key FieldName</param>
         /// <param name="operatorType">Comparison Operator - Default is Equals</param>
         /// <returns>The Entity record requested or null</returns>
-        public TENTITY ReadRecord<TENTITY>(string keyFieldName, string fieldValue, string operatorType = "=") where TENTITY : class
+        public TENTITY? ReadRecord<TENTITY>(string keyFieldName, string fieldValue, string operatorType = "=") where TENTITY : class
         {
             try
             {
@@ -199,7 +199,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="keyFieldName">The Key FieldName</param>
         /// <param name="operatorType">Comparison Operator - Default is Equals</param>
         /// <returns>The Entity record requested or null</returns>
-        public TENTITY ReadRecord<TENTITY>(string keyFieldName, int? fieldValue, string operatorType = "=") where TENTITY : class
+        public TENTITY? ReadRecord<TENTITY>(string keyFieldName, int? fieldValue, string operatorType = "=") where TENTITY : class
         {
             try
             {
@@ -238,7 +238,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <typeparam name="TENTITY">Entity Object type</typeparam>
         /// <param name="Where">criteria</param>
         /// <returns>entity records</returns>
-        public TENTITY ReadRecordWithWhere<TENTITY>(string Where = "") where TENTITY : class
+        public TENTITY? ReadRecordWithWhere<TENTITY>(string Where = "") where TENTITY : class
         {
             try
             {
@@ -278,7 +278,9 @@ namespace AGenius.UsefulStuff.Helpers
         ///param.Add( "@@Name" , obj.Name );
         ///        param.Add( "@City" , obj.City );
         ///        param.Add( "@Address" , obj.Address );</remarks>
+#pragma warning disable CS3001 // Argument type is not CLS-compliant
         public IList<TENTITY> ReadRecordsSproc<TENTITY>(string SprocName, DynamicParameters Params)
+#pragma warning restore CS3001 // Argument type is not CLS-compliant
             where TENTITY : class
         {
             try
@@ -333,7 +335,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <typeparam name="TENTITY">Entity Object type</typeparam>
         /// <param name="Where">criteria</param>
         /// <returns>entity records</returns>
-        public IList<TENTITY> ReadRecords<TENTITY>(string Where = "") where TENTITY : class
+        public IList<TENTITY>? ReadRecords<TENTITY>(string Where = "") where TENTITY : class
         {
             try
             {
@@ -485,7 +487,7 @@ namespace AGenius.UsefulStuff.Helpers
 
                 using (IDbConnection db = new OdbcConnection(DBConnectionString))
                 {
-                    db.Execute(sqlCmd);
+                    db?.Execute(sqlCmd);
                 }
 
             }
@@ -497,7 +499,7 @@ namespace AGenius.UsefulStuff.Helpers
         }
         /// <summary>Execute an SQL Statement </summary>
         /// <param name="sqlCmd">String holding the SQL Command</param>
-        public object ExecuteScalar(string sqlCmd)
+        public object? ExecuteScalar(string sqlCmd)
         {
             try
             {
@@ -509,7 +511,7 @@ namespace AGenius.UsefulStuff.Helpers
 
                 using (IDbConnection db = new OdbcConnection(DBConnectionString))
                 {
-                    return db.ExecuteScalar(sqlCmd);
+                    return db?.ExecuteScalar(sqlCmd);
                 }
 
             }

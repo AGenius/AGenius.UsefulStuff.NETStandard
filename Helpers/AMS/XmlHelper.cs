@@ -44,8 +44,8 @@ namespace AGenius.UsefulStuff.AMS.Profile
 	///   (<see cref="Xml" />, <see cref="Config" />). </remarks>
 	public abstract class XmlBased : Profile
 	{
-		private Encoding m_encoding = Encoding.UTF8;
-		internal XmlBuffer m_buffer;
+		private Encoding? m_encoding = Encoding.UTF8;
+		internal XmlBuffer? m_buffer;
 
 		/// <summary>
 		///   Initializes a new instance of the XmlBased class by setting the <see cref="Profile.Name" /> to <see cref="Profile.DefaultName" />. </summary>
@@ -82,7 +82,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		///	  <see cref="Profile.Name" /> is null or empty. </exception>
 		/// <exception cref="XmlException">
 		///	  Parse error in the XML being loaded from the file. </exception>
-		protected XmlDocument GetXmlDocument()
+		protected XmlDocument? GetXmlDocument()
 		{
 			if (m_buffer != null)
 				return m_buffer.XmlDocument;
@@ -226,7 +226,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		///   If its <see cref="ProfileChangingArgs.Cancel" /> property is set to true, this method 
 		///   returns immediately without changing this property.  After the property has been changed, 
 		///   the <see cref="Profile.Changed" /> event is raised. </remarks>
-		public Encoding Encoding
+		public Encoding? Encoding
 		{
 			get 
 			{ 
@@ -260,9 +260,9 @@ namespace AGenius.UsefulStuff.AMS.Profile
 	/// <seealso cref="XmlBased.Buffer" />
 	public class XmlBuffer : IDisposable
 	{
-		private XmlBased m_profile;
-		private XmlDocument m_doc;
-		private FileStream m_file;
+		private XmlBased? m_profile;
+		private XmlDocument? m_doc;
+		private FileStream? m_file;
 		internal bool m_needsFlushing;
 
 		/// <summary>

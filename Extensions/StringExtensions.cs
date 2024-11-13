@@ -287,7 +287,7 @@ namespace AGenius.UsefulStuff
         /// </summary>
         /// <param name="JWTTokenString">The string to decode</param>
         /// <returns>JSON string</returns>
-        public static string JWTtoJSON(this string JWTTokenString)
+        public static string? JWTtoJSON(this string JWTTokenString)
         {
             return Utils.JWTtoJSON(JWTTokenString);
         }
@@ -606,7 +606,7 @@ namespace AGenius.UsefulStuff
         /// <param name="EndField">The expected string for the end of a field place holder</param>
         /// <returns>The new string content with the new content</returns>
         /// <remarks>Will detect DATETIME and replace with the current date and time as ToLongDateString <see cref="DateTime.Now"/> </remarks>
-        public static string ReplaceObjectFields<T>(this string StringValue, T TheEntity, string ReplaceIfNullWith = null, string StartField = "[[", string EndField = "]]")
+        public static string ReplaceObjectFields<T>(this string StringValue, T TheEntity, string? ReplaceIfNullWith = null, string StartField = "[[", string EndField = "]]")
         {
             return Utils.ReplaceObjectFields(StringValue, TheEntity, ReplaceIfNullWith, StartField, EndField);
         }
@@ -638,7 +638,6 @@ namespace AGenius.UsefulStuff
         /// <returns></returns>
         public static string ReplaceTokens(this string StringValue, string StartField = "[[", string EndField = "]]", string ReplaceWith = "", bool includeFields = false)
         {
-            bool bDone = false;
             string content = StringValue;
 
             try
@@ -653,7 +652,7 @@ namespace AGenius.UsefulStuff
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -1080,7 +1079,7 @@ namespace AGenius.UsefulStuff
         public static string ToSingular(this string word)
         {
             if (word == null)
-                throw new ArgumentNullException("word not supplied");
+                throw new ArgumentNullException("word");
 
             return word.Singularize(inputIsKnownToBePlural: false);
         }

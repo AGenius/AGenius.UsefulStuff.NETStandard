@@ -46,12 +46,13 @@ namespace AGenius.UsefulStuff.AMS.Profile
     ///   <code>HKEY_CURRENT_USER\Software\AMS\ProfileDemo</code>
     /// 
     ///   Each section is then created as a subkey of this location on the registry. </remarks>
+
     public class Registry : Profile
     {
-        public string CompanyName { get; set; }
-        public string ProductName { get; set; }
+        public string? CompanyName { get; set; }
+        public string? ProductName { get; set; }
         // Fields
-        private RegistryKey m_rootKey = Microsoft.Win32.Registry.CurrentUser;
+        private RegistryKey? m_rootKey = Microsoft.Win32.Registry.CurrentUser;
 
 
         /// <summary>
@@ -150,7 +151,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///   If its <see cref="ProfileChangingArgs.Cancel" /> property is set to true, this method 
         ///   returns immediately without changing this property.  After the property has been changed, 
         ///   the <see cref="Profile.Changed" /> event is raised. </remarks>
-        public RegistryKey RootKey
+        public RegistryKey? RootKey
         {
             get
             {
@@ -188,15 +189,15 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///	  The registry key cannot be written to (for example, it was opened as an unwritable key) </exception>
         /// <remarks>
         ///   This method returns a key for the equivalent path: <see cref="RootKey" /> + "\\" + <see cref="Profile.Name" /> + "\\" + section </remarks>
-        protected RegistryKey GetSubKey(string section, bool create, bool writable)
+        protected RegistryKey? GetSubKey(string? section, bool create, bool writable)
         {
             VerifyName();
 
             string keyName = Name + "\\" + section;
 
             if (create)
-                return m_rootKey.CreateSubKey(keyName);
-            return m_rootKey.OpenSubKey(keyName, writable);
+                return m_rootKey?.CreateSubKey(keyName);
+            return m_rootKey?.OpenSubKey(keyName, writable);
         }
 
         /// <summary>
@@ -224,7 +225,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///   returns immediately without setting the value.  After the value has been set, 
         ///   the <see cref="Profile.Changed" /> event is raised. </remarks>
         /// <seealso cref="GetValue" />
-        public override void SetValue(string section, string entry, object value)
+        public override void SetValue(string? section, string? entry, object? value)
         {
             // If the value is null, remove the entry
             this.Name = DefaultName;
@@ -241,7 +242,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
             if (!RaiseChangeEvent(true, ProfileChangeType.SetValue, section, entry, value))
                 return;
 
-            using (RegistryKey subKey = GetSubKey(section, true, true))
+            using (RegistryKey? subKey = GetSubKey(section, true, true))
                 subKey.SetValue(entry, value);
 
             RaiseChangeEvent(false, ProfileChangeType.SetValue, section, entry, value);
@@ -264,13 +265,13 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///	  The registry key cannot be written to (for example, it was opened as an unwritable key) </exception>
         /// <seealso cref="SetValue" />
         /// <seealso cref="Profile.HasEntry" />
-        public override object GetValue(string section, string entry)
+        public override object? GetValue(string? section, string? entry)
         {
             this.Name = DefaultName;
             VerifyAndAdjustSection(ref section);
             VerifyAndAdjustEntry(ref entry);
 
-            using (RegistryKey subKey = GetSubKey(section, false, false))
+            using (RegistryKey? subKey = GetSubKey(section, false, false))
                 return (subKey?.GetValue(entry));
         }
 
@@ -295,21 +296,21 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///   returns immediately without removing the entry.  After the entry has been removed, 
         ///   the <see cref="Profile.Changed" /> event is raised. </remarks>
         /// <seealso cref="RemoveSection" />
-        public override void RemoveEntry(string section, string entry)
+        public override void RemoveEntry(string? section, string? entry)
         {
             this.Name = DefaultName;
             VerifyNotReadOnly();
             VerifyAndAdjustSection(ref section);
             VerifyAndAdjustEntry(ref entry);
 
-            using (RegistryKey subKey = GetSubKey(section, false, true))
+            using (RegistryKey? subKey = GetSubKey(section, false, true))
             {
-                if (subKey != null && subKey.GetValue(entry) != null)
+                if (subKey != null && subKey?.GetValue(entry) != null)
                 {
                     if (!RaiseChangeEvent(true, ProfileChangeType.RemoveEntry, section, entry, null))
                         return;
 
-                    subKey.DeleteValue(entry, false);
+                    subKey?.DeleteValue(entry, false);
                     RaiseChangeEvent(false, ProfileChangeType.RemoveEntry, section, entry, null);
                 }
             }
@@ -334,21 +335,21 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///   returns immediately without removing the section.  After the section has been removed, 
         ///   the <see cref="Profile.Changed" /> event is raised. </remarks>
         /// <seealso cref="RemoveEntry" />
-        public override void RemoveSection(string section)
+        public override void RemoveSection(string? section)
         {
             this.Name = DefaultName;
             VerifyNotReadOnly();
             VerifyName();
             VerifyAndAdjustSection(ref section);
 
-            using (RegistryKey key = m_rootKey.OpenSubKey(Name, true))
+            using (RegistryKey? key = m_rootKey?.OpenSubKey(Name, true))
             {
                 if (key != null && HasSection(section))
                 {
                     if (!RaiseChangeEvent(true, ProfileChangeType.RemoveSection, section, null, null))
                         return;
 
-                    key.DeleteSubKeyTree(section);
+                    key?.DeleteSubKeyTree(section);
                     RaiseChangeEvent(false, ProfileChangeType.RemoveSection, section, null, null);
                 }
             }
@@ -370,17 +371,17 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///   otherwise it's null. </returns>
         /// <seealso cref="Profile.HasEntry" />
         /// <seealso cref="GetSectionNames" />
-        public override string[] GetEntryNames(string section)
+        public override string[]? GetEntryNames(string? section)
         {
             this.Name = DefaultName;
             VerifyAndAdjustSection(ref section);
 
-            using (RegistryKey subKey = GetSubKey(section, false, false))
+            using (RegistryKey? subKey = GetSubKey(section, false, false))
             {
                 if (subKey == null)
                     return null;
 
-                return subKey.GetValueNames();
+                return subKey?.GetValueNames();
             }
         }
 
@@ -395,16 +396,16 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///	  The user does not have RegistryPermission.SetInclude(delete, currentKey) access. </exception>
         /// <seealso cref="Profile.HasSection" />
         /// <seealso cref="GetEntryNames" />
-        public override string[] GetSectionNames()
+        public override string[]? GetSectionNames()
         {
             this.Name = DefaultName;
             VerifyName();
 
-            using (RegistryKey key = m_rootKey.OpenSubKey(Name))
+            using (RegistryKey? key = m_rootKey.OpenSubKey(Name))
             {
                 if (key == null)
                     return null;
-                return key.GetSubKeyNames();
+                return key?.GetSubKeyNames();
             }
         }
     }

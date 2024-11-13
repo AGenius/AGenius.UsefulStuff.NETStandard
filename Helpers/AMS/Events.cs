@@ -93,9 +93,9 @@ namespace AGenius.UsefulStuff.AMS.Profile
 	{   
 		// Fields
 		private readonly ProfileChangeType m_changeType;
-		private readonly string m_section;
-		private readonly string m_entry;
-		private readonly object m_value;
+		private readonly string? m_section;
+		private readonly string? m_entry;
+		private readonly object? m_value;
 
 		/// <summary>
 		///   Initializes a new instance of the ProfileChangedArgs class by initializing all of its properties. </summary>
@@ -108,7 +108,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		/// <param name="value">
 		///   The new value for the entry or method/property, based on the value of changeType. </param>
 		/// <seealso cref="ProfileChangeType" />
-		public ProfileChangedArgs(ProfileChangeType changeType, string section, string entry, object value) 
+		public ProfileChangedArgs(ProfileChangeType changeType, string? section, string? entry, object? value) 
 		{
 			m_changeType = changeType;
 			m_section = section;
@@ -118,7 +118,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		
 		/// <summary>
 		///   Gets the type of change that raised the event. </summary>
-		public ProfileChangeType ChangeType
+		public ProfileChangeType? ChangeType
 		{
 			get 
 			{
@@ -128,7 +128,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		
 		/// <summary>
 		///   Gets the name of the section involved in the change, or null if not applicable. </summary>
-		public string Section
+		public string? Section
 		{
 			get 
 			{
@@ -141,7 +141,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		/// <remarks> 
 		///   If <see cref="ChangeType" /> is set to Other, this property holds the name of the 
 		///   method/property that was changed. </remarks>
-		public string Entry
+		public string? Entry
 		{
 			get 
 			{
@@ -151,7 +151,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		
 		/// <summary>
 		///   Gets the new value for the entry or method/property, based on the value of <see cref="ChangeType" />. </summary>
-		public object Value
+		public object? Value
 		{
 			get 
 			{
@@ -182,7 +182,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		/// <param name="value">
 		///   The new value for the entry or method/property, based on the value of changeType. </param>
 		/// <seealso cref="ProfileChangeType" />
-		public ProfileChangingArgs(ProfileChangeType changeType, string section, string entry, object value) :
+		public ProfileChangingArgs(ProfileChangeType changeType, string? section, string? entry, object? value) :
 			base(changeType, section, entry, value)
 		{
 		}

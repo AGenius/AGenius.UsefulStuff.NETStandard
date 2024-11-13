@@ -76,7 +76,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// Enumerate the SQL Servers returning a list (if any exist)
         /// </summary>
         /// <returns></returns>
-        public string[] EnumerateSQLServers()
+        public string[]? EnumerateSQLServers()
         {
             return RetrieveInformation(SQL_DRIVER_STR);
         }
@@ -84,7 +84,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// Enumerate the specified SQL server returning a list of databases (if any exist)
         /// </summary>
         /// <returns></returns>
-        public string[] EnumerateSQLServersDatabases()
+        public string[]? EnumerateSQLServersDatabases()
         {
             return RetrieveInformation(SQL_DRIVER_STR + ";SERVER=" + m_SQLServer + ";UID=" + m_Username + ";PWD=" + m_Password);
         }
@@ -98,7 +98,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// </summary>
         /// <param name="InputParam">A valid string to query for</param>
         /// <returns></returns>
-        private string[] RetrieveInformation(string InputParam)
+        private string[]? RetrieveInformation(string InputParam)
         {
             IntPtr m_environmentHandle = IntPtr.Zero;
             IntPtr m_connectionHandle = IntPtr.Zero;

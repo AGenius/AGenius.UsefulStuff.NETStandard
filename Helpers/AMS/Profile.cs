@@ -50,12 +50,12 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		/// <summary>
 		///   Event used to notify that the profile is about to be changed. </summary>
 		/// <seealso cref="Changed" />
-		public event ProfileChangingHandler Changing;
+		public event ProfileChangingHandler? Changing;
 
 		/// <summary>
 		///   Event used to notify that the profile has been changed. </summary>
 		/// <seealso cref="Changing" />
-		public event ProfileChangedHandler Changed;				
+		public event ProfileChangedHandler? Changed;				
 		
 		/// <summary>
 		///   Initializes a new instance of the Profile class by setting the <see cref="Name" /> to <see cref="DefaultName" />. </summary>
@@ -192,7 +192,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		///   documentation to see what other exceptions derived versions may raise.
 		///   See <see cref="IProfile.SetValue">IProfile.SetValue</see> for additional remarks. </remarks>
 		/// <seealso cref="GetValue(string, string)"/> />
-		public abstract void SetValue(string section, string entry, object value);
+		public abstract void SetValue(string section, string? entry, object? value);
 		
 		/// <summary>
 		///   Retrieves the value of an entry inside a section. </summary>
@@ -211,7 +211,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		///   documentation to see what other exceptions derived versions may raise. </remarks>
 		/// <seealso cref="SetValue" />
 		/// <seealso cref="HasEntry" />
-		public abstract object GetValue(string section, string entry);
+		public abstract object GetValue(string? section, string? entry);
 
 		/// <summary>
 		///   Retrieves the string value of an entry inside a section, or a default value if the entry does not exist. </summary>
@@ -232,7 +232,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		///   documentation to see what other exceptions may be raised. </remarks>
 		/// <seealso cref="SetValue" />
 		/// <seealso cref="HasEntry" />
-		public virtual string GetValue(string section, string entry, string defaultValue)
+		public virtual string? GetValue(string? section, string? entry, string? defaultValue)
 		{
 			object value = GetValue(section, entry);
 			return (value == null ? defaultValue : value.ToString());
@@ -366,7 +366,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		///   documentation to see what other exceptions may be raised. </remarks>
 		/// <seealso cref="HasSection" />
 		/// <seealso cref="GetEntryNames" />
-		public virtual bool HasEntry(string section, string entry)
+		public virtual bool HasEntry(string? section, string? entry)
 		{
 			string[] entries = GetEntryNames(section);
 			
@@ -385,7 +385,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		///   If the section exists, the return value is true; otherwise false. </returns>
 		/// <seealso cref="HasEntry" />
 		/// <seealso cref="GetSectionNames" />
-		public virtual bool HasSection(string section)
+		public virtual bool HasSection(string? section)
 		{
 			string[] sections = GetSectionNames();
 
@@ -442,7 +442,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		///   documentation to see what other exceptions derived versions may raise. </remarks>
 		/// <seealso cref="HasEntry" />
 		/// <seealso cref="GetSectionNames" />
-		public abstract string[] GetEntryNames(string section);
+		public abstract string[] GetEntryNames(string? section);
 
 		/// <summary>
 		///   Retrieves the names of all the sections. </summary>
@@ -489,7 +489,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		///   This method calls GetSectionNames, GetEntryNames, and GetValue of the derived class, so check the 
 		///   documentation to see what other exceptions may be raised. </para></remarks>
 		/// <seealso cref="SetDataSet" />
-		public virtual DataSet GetDataSet()
+		public virtual DataSet? GetDataSet()
 		{
 			VerifyName();
 			
@@ -612,7 +612,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		///   section name has been passed, and to make any necessary adjustments to it
 		///   before passing it to the corresponding APIs. </remarks>
 		/// <seealso cref="VerifyAndAdjustEntry" />
-		protected virtual void VerifyAndAdjustSection(ref string section)
+		protected virtual void VerifyAndAdjustSection(ref string? section)
 		{
 			if (section == null)
 				throw new ArgumentNullException("section");			
@@ -631,7 +631,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		/// <exception cref="ArgumentNullException">
 		///   entry is null. </exception>
 		/// <seealso cref="VerifyAndAdjustSection" />
-		protected virtual void VerifyAndAdjustEntry(ref string entry)
+		protected virtual void VerifyAndAdjustEntry(ref string? entry)
 		{
 			if (entry == null)
 				throw new ArgumentNullException("entry");			
@@ -691,7 +691,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 		/// <seealso cref="Changed" />
 		/// <seealso cref="OnChanging" />
 		/// <seealso cref="OnChanged" />
-		protected bool RaiseChangeEvent(bool changing, ProfileChangeType changeType, string section, string entry, object value)
+		protected bool RaiseChangeEvent(bool changing, ProfileChangeType changeType, string? section, string? entry, object? value)
 		{
 			if (changing)
 			{
@@ -826,7 +826,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
 
 				task = "checking the values for the entries added";
 								
-					string strValue = GetValue(section, "Text entry", "");
+					string? strValue = GetValue(section, "Text entry", "");
 					if (strValue != "123 abc")
 						throw new Exception("Incorrect string value found for the Text entry: '" + strValue + "'");
 						

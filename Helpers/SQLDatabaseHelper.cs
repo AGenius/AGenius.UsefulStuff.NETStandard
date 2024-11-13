@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -214,7 +215,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="keyFieldName">The Key FieldName</param>
         /// <param name="operatorType">Comparison Operator - Default is Equals</param>
         /// <returns>The Entity record requested or null</returns>
-        public TENTITY ReadRecord<TENTITY>(string keyFieldName, string fieldValue, string operatorType = "=") where TENTITY : class
+        public TENTITY? ReadRecord<TENTITY>(string keyFieldName, string fieldValue, string operatorType = "=") where TENTITY : class
         {
             try
             {
@@ -264,7 +265,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="fieldValue"><see cref="int"/> representing the ID of the required record</param>
         /// <param name="operatorType">Comparison Operator - Default is Equals</param>
         /// <returns>The Entity record requested or null</returns>
-        public TENTITY ReadRecord<TENTITY>(string keyFieldName, int fieldValue, string operatorType = "=") where TENTITY : class
+        public TENTITY? ReadRecord<TENTITY>(string keyFieldName, int fieldValue, string operatorType = "=") where TENTITY : class
         {
             try
             {
@@ -313,7 +314,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="fieldValue"><see cref="int"/> representing the ID of the required record</param>
         /// <param name="operatorType">Comparison Operator - Default is Equals</param>
         /// <returns>The Entity record requested or null</returns>
-        public TENTITY ReadRecord<TENTITY>(string keyFieldName, Guid fieldValue, string operatorType = "=") where TENTITY : class
+        public TENTITY? ReadRecord<TENTITY>(string keyFieldName, Guid fieldValue, string operatorType = "=") where TENTITY : class
         {
             try
             {
@@ -361,7 +362,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="Where">criteria</param>
         /// <param name="OverrideTableName">Override the Entity Table Name</param>
         /// <returns>The Entity record requested or null</returns>
-        public TENTITY ReadRecordWithWhere<TENTITY>(string Where = "", string OverrideTableName = "") where TENTITY : class
+        public TENTITY? ReadRecordWithWhere<TENTITY>(string Where = "", string OverrideTableName = "") where TENTITY : class
         {
             try
             {
@@ -415,7 +416,9 @@ namespace AGenius.UsefulStuff.Helpers
         ///param.Add( "@@Name" , obj.Name );
         ///        param.Add( "@City" , obj.City );
         ///        param.Add( "@Address" , obj.Address );</remarks>
-        public IList<TENTITY> ReadRecordsSproc<TENTITY>(string SprocName, DynamicParameters Params)
+#pragma warning disable CS3001 // Argument type is not CLS-compliant
+        public IList<TENTITY> ReadRecordsSproc<TENTITY>(string SprocName, DynamicParameters? Params)
+#pragma warning restore CS3001 // Argument type is not CLS-compliant
             where TENTITY : class
         {
             try
@@ -484,7 +487,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <typeparam name="TENTITY">Entity Object type</typeparam>
         /// <param name="Where">criteria</param>
         /// <returns><see cref="IList{T}"/> containing the Entity records</returns>
-        public IList<TENTITY> ReadRecords<TENTITY>(string Where = "") where TENTITY : class
+        public IList<TENTITY>? ReadRecords<TENTITY>(string Where = "") where TENTITY : class
         {
             try
             {
@@ -528,7 +531,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="Where">criteria</param>
         /// <param name="noTimeout">Set no Timeout and wait indefinitely</param>
         /// <returns><see cref="IList{T}"/> containing the Entity records</returns>
-        public IList<TENTITY> ReadRecords<TENTITY>(string Where = "", bool noTimeout = false) where TENTITY : class
+        public IList<TENTITY>? ReadRecords<TENTITY>(string Where = "", bool noTimeout = false) where TENTITY : class
         {
             try
             {
@@ -843,7 +846,9 @@ namespace AGenius.UsefulStuff.Helpers
         /// <summary>Execute an SQL Statement </summary>
         /// <param name="sqlCmd">String holding the SQL Command</param>
         /// <param name="Params"><see cref="DynamicParameters"/>Collection of parameters</param>
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         public object ExecuteSQL(string sqlCmd, DynamicParameters Params = null)
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         {
             try
             {
@@ -869,7 +874,7 @@ namespace AGenius.UsefulStuff.Helpers
 
         /// <summary>Execute an SQL Statement </summary>
         /// <param name="sqlCmd">String holding the SQL Command</param>
-        public object ExecuteScalar(string sqlCmd)
+        public object? ExecuteScalar(string sqlCmd)
         {
             try
             {
@@ -1007,7 +1012,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="tableName">Table or View name to use</param>
         /// <param name="Criteria">The Where criteria (optional)</param>
         /// <remarks>WHERE statement is not required in the Criteria specified</remarks>
-        public object DLookup(string FieldName, string tableName, string Criteria = "")
+        public object? DLookup(string FieldName, string tableName, string Criteria = "")
         {
             try
             {
@@ -1191,6 +1196,16 @@ namespace AGenius.UsefulStuff.Helpers
                 throw new DatabaseAccessHelperException(ex.Message);
             }
         }
+
+        public int? GetId<TENTITY>(TENTITY Record, string defaultIDField = "ID")
+        {
+            if (Record != null)
+            {
+                return (int)Record.GetType().GetProperty(defaultIDField, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance).GetValue(Record);
+            }
+            return null;
+        }
+
         /// <summary>
         /// Updates table T with the values in param.
         /// The table must have a key named "Id" and the value of id must be included in the "param" anon object. 
@@ -1200,79 +1215,90 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="Record">Object holding the entity record</param>
         /// <param name="param">list of fields</param>
         /// <param name="OverrideTableName">Override the table name of the object</param>
-        /// <returns>The Id of the updated row. If no row was updated or id was not part of fields, returns null</returns>
-        public int? UpdateFields<TENTITY>(TENTITY Record, List<string> param, string OverrideTableName = "")
+        /// <returns>The Id of the updated row. If no row was updated or id was not part of fields, returns null</returns>       
+        public int? UpdateFields<TENTITY>(TENTITY Record, List<string> param, string OverrideTableName = "", string defaultIDField = "ID")
         {
             _lastError = "";
             _lastQuery = "";
+            if (Record == null)
+            {
+                _lastError = "Record Object is null";
+                throw new ArgumentNullException("Record");
+            }
             List<string> names = new List<string>();
             List<object> values = new List<object>();
             List<DbType> types = new List<DbType>();
 
-            int? id = (int)Record.GetType().GetProperty("ID").GetValue(Record);
-            string TableName = GetTableName<TENTITY>();
-            if (!string.IsNullOrEmpty(OverrideTableName))
+            if (Record.GetType().GetProperty(defaultIDField, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance) != null &&
+                Record.GetType().GetProperty(defaultIDField, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance) != null)
             {
-                TableName = OverrideTableName;
-            }
-            if (string.IsNullOrEmpty(TableName))
-            {
-                _lastError = "Invalid Table Name";
-                throw new ArgumentException(_lastError);
-            }
-
-            foreach (string field in param)
-            {
-                if (field.ToLower() != "id")
+                int? id = GetId(Record, defaultIDField);
+                string TableName = GetTableName<TENTITY>();
+                if (!string.IsNullOrEmpty(OverrideTableName))
                 {
-                    names.Add(field);
-                    values.Add(Record.GetType().GetProperty(field).GetValue(Record));
-                    if (Record.GetType().GetProperty(field).PropertyType.FullName.Contains("eDocStatus"))
+                    TableName = OverrideTableName;
+                }
+                if (string.IsNullOrEmpty(TableName))
+                {
+                    _lastError = "Invalid Table Name";
+                    throw new ArgumentException(_lastError);
+                }
+
+                foreach (string field in param)
+                {
+                    if (field.ToLower() != defaultIDField.ToLower())
                     {
-                        types.Add(SQLDataTypeHelper.GetDbType(typeof(int)));
-                    }
-                    else
-                    {
-                        types.Add(SQLDataTypeHelper.GetDbType(Record.GetType().GetProperty(field).PropertyType));
+                        names.Add(field);
+                        values.Add(Record.GetType().GetProperty(field).GetValue(Record));
+                        if (Record.GetType().GetProperty(field).PropertyType.FullName.Contains("eDocStatus"))
+                        {
+                            types.Add(SQLDataTypeHelper.GetDbType(typeof(int)));
+                        }
+                        else
+                        {
+                            types.Add(SQLDataTypeHelper.GetDbType(Record.GetType().GetProperty(field).PropertyType));
+                        }
                     }
                 }
-            }
 
-            if (id != null && values.Count > 0)
-            {
-                string sql = $"UPDATE {TableName} SET {string.Join(",", names.Select(t => { t = $"{t} = @{t}"; return t; }))} WHERE ID=@id";
-                using (IDbConnection db = new SqlConnection(DBConnectionString))
+
+
+                if (id != null && values.Count > 0)
                 {
-                    using (IDbCommand cmd = db.CreateCommand())
+                    string sql = $"UPDATE {TableName} SET {string.Join(",", names.Select(t => { t = $"{t} = @{t}"; return t; }))} WHERE ID=@id";
+                    using (IDbConnection db = new SqlConnection(DBConnectionString))
                     {
-                        cmd.CommandText = sql;
-                        cmd.CommandType = CommandType.Text;
-                        cmd.CommandTimeout = DefaultTimeOut;
-                        for (int i = 0; i < names.Count; i++)
+                        using (IDbCommand cmd = db.CreateCommand())
                         {
-                            IDbDataParameter p = cmd.CreateParameter();
-                            p.ParameterName = $"@{names[i]}";
-                            if (values[i] == null)
+                            cmd.CommandText = sql;
+                            cmd.CommandType = CommandType.Text;
+                            cmd.CommandTimeout = DefaultTimeOut;
+                            for (int i = 0; i < names.Count; i++)
                             {
-                                p.Value = DBNull.Value;
-                            }
-                            else
-                            {
-                                p.Value = values[i];
-                            }
+                                IDbDataParameter p = cmd.CreateParameter();
+                                p.ParameterName = $"@{names[i]}";
+                                if (values[i] == null)
+                                {
+                                    p.Value = DBNull.Value;
+                                }
+                                else
+                                {
+                                    p.Value = values[i];
+                                }
 
-                            p.DbType = types[i];
-                            cmd.Parameters.Add(p);
+                                p.DbType = types[i];
+                                cmd.Parameters.Add(p);
+                            }
+                            // Add the id parameter
+                            IDbDataParameter pID = cmd.CreateParameter();
+                            pID.ParameterName = $"@id";
+                            pID.Value = id;
+                            pID.DbType = DbType.Int32;
+                            cmd.Parameters.Add(pID);
+                            //return db.Execute(sql,cmd) > 0 ? id : null;
+                            db.Open();
+                            return cmd.ExecuteNonQuery();
                         }
-                        // Add the id parameter
-                        IDbDataParameter pID = cmd.CreateParameter();
-                        pID.ParameterName = $"@id";
-                        pID.Value = id;
-                        pID.DbType = DbType.Int32;
-                        cmd.Parameters.Add(pID);
-                        //return db.Execute(sql,cmd) > 0 ? id : null;
-                        db.Open();
-                        return cmd.ExecuteNonQuery();
                     }
                 }
             }
@@ -1289,64 +1315,72 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="fieldName">The single field name</param>      
         /// <param name="fieldValue">The new field value</param>        
         /// <returns>The Id of the updated row. If no row was updated or id was not part of fields, returns null</returns>
-        public int? UpdateField<TENTITY>(TENTITY Record, string fieldName, object fieldValue)
+        public int? UpdateField<TENTITY>(TENTITY Record, string fieldName, object fieldValue, string defaultIDField = "ID")
         {
             _lastError = "";
             _lastQuery = "";
+            if (Record == null)
+            {
+                _lastError = "Record Object is null";
+                throw new ArgumentNullException("Record");
+            }
             List<string> names = new List<string>();
             List<object> values = new List<object>();
             List<DbType> types = new List<DbType>();
-
-            int? id = (int)Record.GetType().GetProperty("ID").GetValue(Record);
-            string TableName = GetTableName<TENTITY>();
-            if (string.IsNullOrEmpty(TableName))
+            if (Record.GetType().GetProperty(defaultIDField, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance) != null &&
+               Record.GetType().GetProperty(defaultIDField, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance) != null)
             {
-                _lastError = "Invalid Table Name";
-                throw new ArgumentException(_lastError);
-            }
-
-            if (fieldName.ToLower() != "id")
-            {
-                names.Add(fieldName);
-                values.Add(fieldValue);
-                types.Add(SQLDataTypeHelper.GetDbType(Record.GetType().GetProperty(fieldName).PropertyType));
-            }
-
-            if (id != null && values.Count > 0)
-            {
-                string sql = $"UPDATE {TableName} SET {string.Join(",", names.Select(t => { t = $"{t} = @{t}"; return t; }))} WHERE ID=@id";
-                using (IDbConnection db = new SqlConnection(DBConnectionString))
+                int? id = (int)Record.GetType().GetProperty(defaultIDField, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance).GetValue(Record);
+                string TableName = GetTableName<TENTITY>();
+                if (string.IsNullOrEmpty(TableName))
                 {
-                    using (IDbCommand cmd = db.CreateCommand())
-                    {
-                        cmd.CommandText = sql;
-                        cmd.CommandType = CommandType.Text;
-                        cmd.CommandTimeout = DefaultTimeOut;
-                        for (int i = 0; i < names.Count; i++)
-                        {
-                            IDbDataParameter p = cmd.CreateParameter();
-                            p.ParameterName = $"@{names[i]}";
-                            if (values[i] == null)
-                            {
-                                p.Value = DBNull.Value;
-                            }
-                            else
-                            {
-                                p.Value = values[i];
-                            }
+                    _lastError = "Invalid Table Name";
+                    throw new ArgumentException(_lastError);
+                }
 
-                            p.DbType = types[i];
-                            cmd.Parameters.Add(p);
+                if (fieldName.ToLower() != defaultIDField.ToLower())
+                {
+                    names.Add(fieldName);
+                    values.Add(fieldValue);
+                    types.Add(SQLDataTypeHelper.GetDbType(Record.GetType().GetProperty(fieldName).PropertyType));
+                }
+
+                if (id != null && values.Count > 0)
+                {
+                    string sql = $"UPDATE {TableName} SET {string.Join(",", names.Select(t => { t = $"{t} = @{t}"; return t; }))} WHERE ID=@id";
+                    using (IDbConnection db = new SqlConnection(DBConnectionString))
+                    {
+                        using (IDbCommand cmd = db.CreateCommand())
+                        {
+                            cmd.CommandText = sql;
+                            cmd.CommandType = CommandType.Text;
+                            cmd.CommandTimeout = DefaultTimeOut;
+                            for (int i = 0; i < names.Count; i++)
+                            {
+                                IDbDataParameter p = cmd.CreateParameter();
+                                p.ParameterName = $"@{names[i]}";
+                                if (values[i] == null)
+                                {
+                                    p.Value = DBNull.Value;
+                                }
+                                else
+                                {
+                                    p.Value = values[i];
+                                }
+
+                                p.DbType = types[i];
+                                cmd.Parameters.Add(p);
+                            }
+                            // Add the id parameter
+                            IDbDataParameter pID = cmd.CreateParameter();
+                            pID.ParameterName = $"@id";
+                            pID.Value = id;
+                            pID.DbType = DbType.Int32;
+                            cmd.Parameters.Add(pID);
+                            //return db.Execute(sql,cmd) > 0 ? id : null;
+                            db.Open();
+                            return cmd.ExecuteNonQuery();
                         }
-                        // Add the id parameter
-                        IDbDataParameter pID = cmd.CreateParameter();
-                        pID.ParameterName = $"@id";
-                        pID.Value = id;
-                        pID.DbType = DbType.Int32;
-                        cmd.Parameters.Add(pID);
-                        //return db.Execute(sql,cmd) > 0 ? id : null;
-                        db.Open();
-                        return cmd.ExecuteNonQuery();
                     }
                 }
             }
@@ -1371,14 +1405,13 @@ namespace AGenius.UsefulStuff.Helpers
             List<object> values = new List<object>();
             List<DbType> types = new List<DbType>();
 
-
             if (string.IsNullOrEmpty(TableName))
             {
                 _lastError = "Invalid Table Name";
                 throw new ArgumentException(_lastError);
             }
 
-            if (fieldName.ToLower() != "id")
+            if (fieldName.ToLower() != IDFieldName.ToLower())
             {
                 names.Add(fieldName);
                 values.Add(fieldValue);
@@ -1471,7 +1504,7 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="tableName">Table to query</param>
         /// <param name="schemaName">Schema Name : default :dbo </param>
         /// <returns>IList of TableColumns</returns>
-        public IList<TableColumn> GetTableColumns(string tableName, string schemaName = "dbo")
+        public IList<TableColumn>? GetTableColumns(string tableName, string schemaName = "dbo")
         {
             if (TableExists(tableName))
             {
@@ -1497,7 +1530,8 @@ namespace AGenius.UsefulStuff.Helpers
         /// <param name="colSize">Column Size : defaul :50</param>
         /// <param name="allowNull">Column Null allowed : default :true</param>
         /// <param name="schemaName">Schema Name : default :dbo </param>
-        public void CreateColumn(string tableName, string columnName, string dataType = "varchar", int colSize = 50, bool allowNull = true, string schemaName = "dbo")
+        /// <param name="collation">Set the Columns Collation = default is SQL_Latin1_General_CP1_CI_AS</param>
+        public void CreateColumn(string tableName, string columnName, string dataType = "varchar", int colSize = 50, bool allowNull = true, string schemaName = "dbo", string collation = "SQL_Latin1_General_CP1_CI_AS")
         {
             string colDataTypeSQL = dataType;
             string allowNullSQL = allowNull ? "NULL" : "NOT NULL";
@@ -1522,7 +1556,7 @@ namespace AGenius.UsefulStuff.Helpers
                     COMMIT
                     BEGIN TRANSACTION                    
                     ";
-            createSQL += $@"ALTER TABLE {schemaName}.{tableName} ADD {columnName} {colDataTypeSQL} {allowNullSQL}";
+            createSQL += $@"ALTER TABLE {schemaName}.{tableName} ADD {columnName} {colDataTypeSQL} {allowNullSQL} COLLATE {collation}";
 
             if (dataType.ToLower() == "bit")
             {

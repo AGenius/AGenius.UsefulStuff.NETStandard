@@ -12,14 +12,13 @@ using System.Net.Mime;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-//using System.Web.Script.Serialization;
-//using System.Windows.Forms;
 using AGenius.UsefulStuff.Helpers.ActiveDirectory;
 using Newtonsoft.Json;
-//using static AGenius.UsefulStuff.ObjectExtensions;
 using System.Runtime.InteropServices;
 using System.Web;
 using System.Net.Http;
+using System.Runtime.Versioning;
+using static Dapper.Contrib.Extensions.SqlMapperExtensions;
 
 namespace AGenius.UsefulStuff
 {
@@ -42,7 +41,7 @@ namespace AGenius.UsefulStuff
             SavedSearches
         }
 
-        private static Dictionary<KnownFolder, Guid> _knownFolderGuids = new Dictionary<KnownFolder, Guid>
+        private static readonly Dictionary<KnownFolder, Guid> _knownFolderGuids = new Dictionary<KnownFolder, Guid>
             {
                 { KnownFolder.Contacts, new Guid("56784854-C6CB-462B-8169-88E350ACB882") },
                 { KnownFolder.Downloads, new Guid("374DE290-123F-4565-9164-39C4925E467B") },
@@ -55,7 +54,7 @@ namespace AGenius.UsefulStuff
         /// <param name="knownFolder">Knownfolder selected</param>
         /// <returns>String</returns>
         /// <exception cref="NotSupportedException"></exception>
-        public static string GetKnownFolderPath(KnownFolder knownFolder)
+        public static string? GetKnownFolderPath(KnownFolder knownFolder)
         {
             if (Environment.OSVersion.Version.Major < 6) throw new NotSupportedException();
 
@@ -81,17 +80,23 @@ namespace AGenius.UsefulStuff
         {
             try
             {
-                string FilePath = Path.GetDirectoryName(FullPath);
+                if (string.IsNullOrEmpty(FullPath))
+                    throw new ArgumentNullException("Path not supplied");
+
+                string FilePath = Path.GetDirectoryName(FullPath) ?? "";
                 string FileName = Path.GetFileNameWithoutExtension(FullPath).ToLower();
                 bool isRunning = false;
 
                 Process[] pList = Process.GetProcessesByName(FileName);
                 foreach (Process p in pList)
                 {
-                    if (p.MainModule.FileName.StartsWith(FilePath, StringComparison.InvariantCultureIgnoreCase))
+                    if (p.MainModule != null)
                     {
-                        isRunning = true;
-                        break;
+                        if (p.MainModule.FileName.StartsWith(FilePath, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            isRunning = true;
+                            break;
+                        }
                     }
                 }
 
@@ -149,6 +154,7 @@ namespace AGenius.UsefulStuff
         /// <summary>Convert an Image to a ByteArray</summary>
         /// <param name="imageIn">The Image oject to convert</param>
         /// <returns>ByteArray</returns>
+        [SupportedOSPlatform("windows")]
         public static byte[] imageToByteArray(Image imageIn)
         {
             MemoryStream ms = new MemoryStream();
@@ -158,6 +164,7 @@ namespace AGenius.UsefulStuff
         /// <summary>Convert a ByteArray to an Image object</summary>
         /// <param name="byteArrayIn">The ByteArray</param>
         /// <returns>Image Object</returns>
+        [SupportedOSPlatform("windows", )]
         public static Image byteArrayToImage(byte[] byteArrayIn)
         {
             MemoryStream ms = new MemoryStream(byteArrayIn);
@@ -204,6 +211,10 @@ namespace AGenius.UsefulStuff
         /// <returns>Concatenated string list of results</returns>
         public static string BuildFilterString<T>(string fieldName, List<T> objectList)
         {
+            if (objectList == null)
+            {
+                throw new ArgumentNullException("Missing Object List");
+            }
             List<string> itemList = objectList.ConvertAll(f => f.ToString());
             string filter = string.Empty;
 
@@ -242,11 +253,11 @@ namespace AGenius.UsefulStuff
         /// <summary>Read the contents of a text file into a string </summary>
         /// <param name="filepath">File to read</param>
         /// <returns>files contents</returns>
-        public static string ReadTextFile(string filepath)
+        public static string? ReadTextFile(string filepath)
         {
             try
             {
-                string test = Path.GetPathRoot(filepath);
+                string? test = Path.GetPathRoot(filepath);
 
                 if (String.IsNullOrEmpty(test) || (test.StartsWith(@"\") && !test.StartsWith(@"\\")))
                 {
@@ -280,7 +291,7 @@ namespace AGenius.UsefulStuff
         /// <summary>Read the contents of a text file into a string list</summary>
         /// <param name="filepath">File to read</param>
         /// <returns>List of files</returns>
-        public static IList<string> ReadTextFileToList(string filepath)
+        public static IList<string>? ReadTextFileToList(string filepath)
         {
             try
             {
@@ -318,11 +329,10 @@ namespace AGenius.UsefulStuff
         {
             try
             {
-                string test = Path.GetPathRoot(filepath);
+                string? test = Path.GetPathRoot(filepath);
 
                 if (String.IsNullOrEmpty(test) || (test.StartsWith(@"\") && test.Substring(1, 1) != @"\"))
                 {
-
                     // No Full path supplied so start from Application root
                     if (test.StartsWith(@"\"))
                     {
@@ -351,14 +361,11 @@ namespace AGenius.UsefulStuff
         /// <param name="SubFolder">Override the sub folder (logs) name</param>
         /// <param name="AddTimeStamp">Add a time stamp to the begining of the message</param>
         /// <param name="appendNewLine">Automatically add a new line after the message</param>
-        public static void WriteLogFile(string MessageText, string LogFileName, string LogPath = null, string SubFolder = "Logs", bool AddTimeStamp = false, bool appendNewLine = true, int maxLogSize = 1024000)
+        public static void WriteLogFile(string MessageText, string? LogFileName, string? LogPath = null, string SubFolder = "Logs", bool AddTimeStamp = false, bool appendNewLine = true, int maxLogSize = 1024000)
         {
             try
             {
-                if (LogPath == null)
-                {
-                    LogPath = ApplicationPath;
-                }
+                LogPath ??= ApplicationPath;
                 string sPath = Path.Combine(LogPath, SubFolder ?? "", $"{LogFileName}.log");
 
                 if (System.IO.File.Exists(sPath).Equals(false))
@@ -505,12 +512,12 @@ namespace AGenius.UsefulStuff
         public static string GetNewfileName(string FileName, bool addBrackets, List<string> filesList)
         {
             string fileExt = Path.GetExtension(FileName).Replace(".", "");
-            string FolderPath = Path.GetDirectoryName(FileName);
+            string? FolderPath = Path.GetDirectoryName(FileName);
             string basefilename = Path.GetFileNameWithoutExtension(FileName);
             int counter = 1;
             //string fullFileName = string.Format(@"{0}\{1} ({2}).{3}", FolderPath, basefilename, counter, fileExt);            
             string fullFileName = $"{FolderPath}\\{basefilename}.{fileExt}";
-            string foundFile = filesList.Find(x => x.ToLower() == fullFileName.ToLower());
+            string? foundFile = filesList.Find(x => x.Equals(fullFileName, StringComparison.CurrentCultureIgnoreCase));
             while (!string.IsNullOrEmpty(foundFile))
             {
                 counter++;
@@ -522,7 +529,7 @@ namespace AGenius.UsefulStuff
                 {
                     fullFileName = $"{FolderPath}\\{basefilename}_{counter}.{fileExt}";
                 }
-                foundFile = filesList.Find(x => x.ToLower() == fullFileName.ToLower());
+                foundFile = filesList.Find(x => x.Equals(fullFileName, StringComparison.CurrentCultureIgnoreCase));
             }
             return fullFileName;
         }
@@ -532,17 +539,17 @@ namespace AGenius.UsefulStuff
         /// <param name="searchOption">The required search option <see cref="SearchOption"/></param>
         /// <param name="ignoreThese">List of file names to be ignored</param>
         /// <returns></returns>
-        public static List<string> GetFilesList(string rootPath, string fileExt, SearchOption searchOption, List<string> ignoreThese = null)
+        public static List<string>? GetFilesList(string rootPath, string fileExt, SearchOption searchOption, List<string> ignoreThese = null)
         {
             if (!Directory.Exists(rootPath.ToLower()))
             {
                 return null;
             }
-            string[] filePaths = GetFiles(rootPath, fileExt, searchOption);
+            string[]? filePaths = GetFiles(rootPath, fileExt, searchOption);
 
             List<string> filenames = new List<string>();
 
-            if (filePaths.Length > 0)
+            if (filePaths != null && filePaths.Length > 0)
             {
                 // add to list of documents to convert to single PDF 
                 foreach (string docFile in filePaths)
@@ -567,14 +574,14 @@ namespace AGenius.UsefulStuff
         /// <param name="fileExt">Only return files of this extension - Can be comma seperated list</param>
         /// <param name="searchOption">The required search option <see cref="SearchOption"/></param>        
         /// <returns></returns>
-        public static string[] GetFiles(string rootPath, string fileExt, SearchOption searchOption)
+        public static string[]? GetFiles(string rootPath, string fileExt, SearchOption searchOption)
         {
             if (!Directory.Exists(rootPath.ToLower()))
             {
                 return null;
             }
             string[] filePaths = new string[] { };
-            if (fileExt.Contains(","))
+            if (fileExt.Contains(','))
             {
                 var exts = fileExt.Split(',');
                 foreach (var ex in exts)
@@ -802,7 +809,7 @@ namespace AGenius.UsefulStuff
 
             }
 
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 return "";
             }
@@ -856,7 +863,7 @@ namespace AGenius.UsefulStuff
         /// <typeparam name="TENTITY">Entity type</typeparam>
         /// <param name="serializedString">JSON String</param>
         /// <returns>Object of type TENTITY</returns>
-        public static TENTITY DeSerializeObject<TENTITY>(string serializedString)
+        public static TENTITY? DeSerializeObject<TENTITY>(string serializedString) where TENTITY : class
         {
             return JsonConvert.DeserializeObject<TENTITY>(serializedString);
         }
@@ -865,7 +872,7 @@ namespace AGenius.UsefulStuff
         /// </summary>
         /// <param name="JWTTokenString">The JWT token to be decoded</param>
         /// <returns>string containing the JSON object</returns>
-        public static string JWTtoJSON(string JWTTokenString)
+        public static string? JWTtoJSON(string JWTTokenString)
         {
             var jwtHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
 
@@ -968,12 +975,12 @@ namespace AGenius.UsefulStuff
         /// <param name="EntityObject">The Object Reference</param>
         /// <param name="PropertyName">Name of the Property to find</param>
         /// <returns></returns>
-        public static object GetValueForPropertyBystringName<TEntity>(TEntity EntityObject, string PropertyName)
+        public static object? GetValueForPropertyByStringName<TEntity>(TEntity EntityObject, string PropertyName)
         {
             // Build the Properties list so it can be accessed via the name string
             foreach (PropertyInfo p in EntityObject.GetType().GetProperties())
             {
-                if (p.Name.ToLower() == PropertyName.ToLower())
+                if (p.Name.Equals(PropertyName, StringComparison.CurrentCultureIgnoreCase))
                 {
                     return p.GetValue(EntityObject);
                 }
@@ -1021,17 +1028,17 @@ namespace AGenius.UsefulStuff
             int SMTPPort = 25,
             bool SMTPSSL = false,
             bool SMTPAuth = false,
-            string BCCList = null,
-            string CCList = null,
-            string imagespath = null,
-            List<string> AttachmentPaths = null,
-            bool LogErrors = false,
-            string LogPath = null,
+            string? BCCList = null,
+            string? CCList = null,
+            string? imagespath = null,
+            List<string>? AttachmentPaths = null,
+            bool? LogErrors = false,
+            string? LogPath = null,
             MailPriority priority = MailPriority.Normal
             )
         {
             List<string> images = new List<string>(); // This is to store the images found
-            AlternateView avHtml = null;
+            AlternateView? avHtml = null;
 
             try
             {
@@ -1110,9 +1117,9 @@ namespace AGenius.UsefulStuff
 
                         catch (Exception ex)
                         {
-                            if (LogErrors)
+                            if (LogErrors.HasValue && LogErrors.Value)
                             {
-                                WriteLogFile("Possible invalid Image - " + strItem, "SMTPErrors", LogPath, null, true, true);
+                                WriteLogFile("Possible invalid Image - " + strItem, "SMTPErrors", LogPath, AddTimeStamp: true, appendNewLine: true);
                                 WriteLogFile($"Trace-To:{EmailTo} - Subject:{Subject} - Message:{ex.Message} {Environment.NewLine}{ex.StackTrace}", "SMTPErrors", LogPath, null, true, true);
                             }
 
@@ -1125,9 +1132,9 @@ namespace AGenius.UsefulStuff
 
             catch (Exception ex)
             {
-                if (LogErrors)
+                if (LogErrors.HasValue && LogErrors.Value)
                 {
-                    WriteLogFile($"Trace-Message:{ex.Message} {Environment.NewLine}{ex.StackTrace}", "SMTPErrors", LogPath, null, true, true);
+                    WriteLogFile($"Trace-Message:{ex.Message} {Environment.NewLine}{ex.StackTrace}", "SMTPErrors", LogPath, AddTimeStamp: true, appendNewLine: true);
                 }
 
                 EmailFailedReason = ex.Message;
@@ -1155,7 +1162,7 @@ namespace AGenius.UsefulStuff
                 // Bcc ?
                 if (!String.IsNullOrEmpty(BCCList))
                 {
-                    if (!BCCList.EndsWith(";"))
+                    if (!BCCList.EndsWith(@";"))
                     {
                         BCCList += ";";
                     }
@@ -1172,7 +1179,7 @@ namespace AGenius.UsefulStuff
                 // CC ?
                 if (!String.IsNullOrEmpty(CCList))
                 {
-                    if (!CCList.EndsWith(";"))
+                    if (!CCList.EndsWith(@";"))
                     {
                         CCList += ";";
                     }
@@ -1234,10 +1241,10 @@ namespace AGenius.UsefulStuff
             catch (Exception ex)
             {
                 EmailFailedReason = ex.Message;
-                if (LogErrors)
+                if (LogErrors.HasValue && LogErrors.Value)
                 {
-                    WriteLogFile("Error Sending Email", "SMTPErrors", LogPath, null, true, true);
-                    WriteLogFile($"Trace-To:{EmailTo} - Subject:{Subject} - Message:{ex.Message} {Environment.NewLine}{ex.StackTrace}", "SMTPErrors", LogPath, null, true, true);
+                    WriteLogFile("Error Sending Email", "SMTPErrors", LogPath, AddTimeStamp: true, appendNewLine: true);
+                    WriteLogFile($"Trace-To:{EmailTo} - Subject:{Subject} - Message:{ex.Message} {Environment.NewLine}{ex.StackTrace}", "SMTPErrors", LogPath, AddTimeStamp: true, appendNewLine: true);
                 }
 
                 return false;
@@ -1253,7 +1260,7 @@ namespace AGenius.UsefulStuff
         /// <param name="FormatForDateTimeFields">DateTime fields formatted to include Time formatted as supplied mask e.g. dd/MM/yyyy HH:mm </param>
         /// <returns>The new string content with the new content</returns>
         /// <remarks>Will detect DATETIME and replace with the current date and time as ToLongDateString <see cref="DateTime.Now"/> </remarks>
-        public static string ReplaceObjectFields<T>(string ContentString, T TheEntity, string ReplaceIfNullWith = null,
+        public static string ReplaceObjectFields<T>(string ContentString, T TheEntity, string? ReplaceIfNullWith = null,
             string StartField = "[[", string EndField = "]]", string FormatForDateTimeFields = "dd/MM/yyyy")
         {
             string NewContentString = ContentString;
@@ -1264,7 +1271,7 @@ namespace AGenius.UsefulStuff
             {
                 string fieldName = fieldNameEntry;
                 string objectName = string.Empty;
-                if (fieldName.Contains("."))
+                if (fieldName.Contains('.'))
                 {
                     // Extract object name
                     objectName = fieldNameEntry.Split('.')[0];
@@ -1273,7 +1280,7 @@ namespace AGenius.UsefulStuff
                     switch (objectName.ToUpper())
                     {
                         case "DATETIME":
-                            if (fieldName.ToUpper() == "NOW")
+                            if (fieldName.Equals("NOW", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 NewContentString = NewContentString.Replace($"{StartField}{objectName}.{fieldName}{EndField}", DateTime.Now.ToLongDateString());
                             }
@@ -1298,7 +1305,7 @@ namespace AGenius.UsefulStuff
                 }
                 else
                 {
-                    if (fieldName.ToUpper() == "NOW")
+                    if (fieldName.Equals("NOW", StringComparison.CurrentCultureIgnoreCase))
                     {
                         NewContentString = NewContentString.Replace($"{StartField}{fieldName}{EndField}", DateTime.Now.ToLongDateString());
                     }
@@ -1444,8 +1451,8 @@ namespace AGenius.UsefulStuff
             string SMTPUser,
             string SMTPPass,
             int SMTPPort = 25,
-            bool LogErrors = false,
-            string LogPath = null,
+            bool? LogErrors = false,
+            string? LogPath = null,
             MailPriority priority = MailPriority.Normal)
         {
             return SendEmailMessage(isHTML, MailFrom, EmailTo, MessageBody, Subject, SMTPHost, SMTPUser, SMTPPass, SMTPPort, false, false, null, null, null, null, LogErrors, LogPath, priority);
@@ -1465,11 +1472,11 @@ namespace AGenius.UsefulStuff
         public class Event
         {
             /// <summary>Date this holiday is describing</summary>
-            public DateTime date { get; set; }
+            public DateTime? date { get; set; }
             /// <summary>Notes related to this entry</summary>
-            public string notes { get; set; }
+            public string? notes { get; set; }
             /// <summary>The Holiday Title</summary>
-            public string title { get; set; }
+            public string? title { get; set; }
             /// <summary>Usless</summary>
             public bool? bunting { get; set; }
         }
@@ -1520,32 +1527,33 @@ namespace AGenius.UsefulStuff
         /// <returns>Full path with Image file name</returns>
         /// <remarks> Setting boxProperties to null will stop a box being drawn</remarks>
         /// <exception cref="ArgumentNullException"></exception>
+        [SupportedOSPlatform("windows")]
         public static string BuildWatermarkImage(ImageBuildProperties iProps)
         {
             if (iProps == null)
             {
                 throw new ArgumentNullException("Image Build Properties Missing");
             }
-            string imageFilePath = iProps.ImageFileName;
+            string? imageFilePath = iProps.ImageFileName;
 
             // Ensure the correct file extention is applied
             if (!iProps.ImageFileName.ToLower().EndsWith(iProps.OutputImageFormat.ToString().ToLower()))
             {
-                imageFilePath += $".{iProps.OutputImageFormat.ToString()}";
+                imageFilePath += $".{iProps.OutputImageFormat}";
             }
             if (File.Exists(imageFilePath))
             {
                 System.IO.File.Delete(imageFilePath);
             }
 
-            int w = iProps.Width;
-            int h = iProps.Height;
-            Bitmap bitmap;
+            int w = iProps.Width ?? 0;
+            int h = iProps.Height ?? 0;
+            Bitmap? bitmap;
             if (iProps.StartingImage != null)
             {
-                if (iProps.isTransparent)
+                if (iProps.isTransparent.HasValue && iProps.isTransparent.Value && iProps.TransparentColour.HasValue)
                 {
-                    bitmap = new Bitmap(iProps.StartingImage, w, h).MakeTransparent(iProps.TransparentColour, 10);
+                    bitmap = new Bitmap(iProps.StartingImage, w, h).MakeTransparent(iProps.TransparentColour.Value, 10);
                 }
                 else
                 {
@@ -1554,9 +1562,9 @@ namespace AGenius.UsefulStuff
             }
             else
             {
-                if (iProps.isTransparent)
+                if (iProps.isTransparent.HasValue && iProps.isTransparent.Value && iProps.TransparentColour.HasValue)
                 {
-                    bitmap = new Bitmap(w, h).MakeTransparent(iProps.TransparentColour, 10);
+                    bitmap = new Bitmap(w, h).MakeTransparent(iProps.TransparentColour.Value, 10);
                 }
                 else
                 {
@@ -1564,7 +1572,7 @@ namespace AGenius.UsefulStuff
                 }
             }
 
-            using (Graphics g = Graphics.FromImage(bitmap))
+            using (Graphics? g = Graphics.FromImage(bitmap))
             {
                 if (iProps.boxProperties != null)
                 {
@@ -1572,7 +1580,7 @@ namespace AGenius.UsefulStuff
                     int left = iProps.boxProperties.Left;
 
                     // Create pen.
-                    Pen pen = new Pen(iProps.boxProperties.Colour, iProps.boxProperties.Thickness);
+                    Pen? pen = new Pen(iProps.boxProperties.Colour, iProps.boxProperties.Thickness);
 
                     // Create rectangle.
                     Rectangle rect = new Rectangle(left, top, iProps.boxProperties.Width, iProps.boxProperties.Height);
@@ -1602,7 +1610,7 @@ namespace AGenius.UsefulStuff
                 g.SmoothingMode = SmoothingMode.AntiAlias;
                 g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                StringFormat sf = new StringFormat
+                StringFormat? sf = new StringFormat
                 {
                     Alignment = iProps.textProperties.Halignment,
                     LineAlignment = iProps.textProperties.Valignment

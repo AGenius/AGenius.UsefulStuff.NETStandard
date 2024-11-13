@@ -120,7 +120,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
         /// <returns>
         ///   An XPath string. </returns>
         /// <seealso cref="GetEntryPath" />
-        private string GetSectionsPath(string section)
+        private string GetSectionsPath(string? section)
         {
             return "section[@name=\"" + section + "\"]";
         }
@@ -130,7 +130,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
         /// <returns>
         ///   An XPath string. </returns>
         /// <seealso cref="GetSectionsPath" />
-        private string GetEntryPath(string entry)
+        private string GetEntryPath(string? entry)
         {
             return "entry[@name=\"" + entry + "\"]";
         }
@@ -196,7 +196,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///   Note: If <see cref="XmlBased.Buffering" /> is enabled, the value is not actually written to the
         ///   XML file until the buffer is flushed (or closed). </para></remarks>
         /// <seealso cref="GetValue" />
-        public override void SetValue(string section, string entry, object value)
+        public override void SetValue(string? section, string? entry, object? value)
         {
             // If the value is null, remove the entry
             if (value == null)
@@ -213,7 +213,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
             if (!RaiseChangeEvent(true, ProfileChangeType.SetValue, section, entry, value))
                 return;
 
-            string valueString = value.ToString();
+            string? valueString = value.ToString();
 
             // If the file does not exist, use the writer to quickly create it
             if ((m_buffer == null || m_buffer.IsEmpty) && !File.Exists(Name))
@@ -250,22 +250,22 @@ namespace AGenius.UsefulStuff.AMS.Profile
 
             // The file exists, edit it
 
-            XmlDocument doc = GetXmlDocument();
-            XmlElement root = doc.DocumentElement;
+            XmlDocument? doc = GetXmlDocument();
+            XmlElement? root = doc.DocumentElement;
 
             // Get the section element and add it if it's not there
-            XmlNode sectionNode = root.SelectSingleNode(GetSectionsPath(section));
+            XmlNode? sectionNode = root?.SelectSingleNode(GetSectionsPath(section));
             if (sectionNode == null)
             {
                 XmlElement element = doc.CreateElement("section");
                 XmlAttribute attribute = doc.CreateAttribute("name");
                 attribute.Value = section;
                 element.Attributes.Append(attribute);
-                sectionNode = root.AppendChild(element);
+                sectionNode = root?.AppendChild(element);
             }
 
             // Get the entry element and add it if it's not there
-            XmlNode entryNode = sectionNode.SelectSingleNode(GetEntryPath(entry));
+            XmlNode? entryNode = sectionNode.SelectSingleNode(GetEntryPath(entry));
             if (entryNode == null)
             {
                 XmlElement element = doc.CreateElement("entry");
@@ -305,23 +305,23 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///	  Parse error in the XML being loaded from the file. </exception>
         /// <seealso cref="SetValue" />
         /// <seealso cref="Profile.HasEntry" />
-        public override object GetValue(string section, string entry)
+        public override object? GetValue(string? section, string? entry)
         {
             VerifyAndAdjustSection(ref section);
             VerifyAndAdjustEntry(ref entry);
             try
             {
-                XmlDocument doc = GetXmlDocument();
+                XmlDocument? doc = GetXmlDocument();
                 if (doc == null)
                 {
                     return null;
                 }
-                XmlElement root = doc.DocumentElement;
+                XmlElement? root = doc.DocumentElement;
                 if (root == null)
                 {
                     return null;
                 }
-                XmlNode entryNode = root.SelectSingleNode(GetSectionsPath(section) + "/" + GetEntryPath(entry));
+                XmlNode? entryNode = root.SelectSingleNode(GetSectionsPath(section) + "/" + GetEntryPath(entry));
                 if (entryNode == null)
                 {
                     return null;
@@ -357,20 +357,20 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///   Note: If <see cref="XmlBased.Buffering" /> is enabled, the entry is not removed from the
         ///   XML file until the buffer is flushed (or closed). </para></remarks>
         /// <seealso cref="RemoveSection" />
-        public override void RemoveEntry(string section, string entry)
+        public override void RemoveEntry(string? section, string? entry)
         {
             VerifyNotReadOnly();
             VerifyAndAdjustSection(ref section);
             VerifyAndAdjustEntry(ref entry);
 
             // Verify the document exists
-            XmlDocument doc = GetXmlDocument();
+            XmlDocument? doc = GetXmlDocument();
             if (doc == null)
                 return;
 
             // Get the entry's node, if it exists
-            XmlElement root = doc.DocumentElement;
-            XmlNode entryNode = root.SelectSingleNode(GetSectionsPath(section) + "/" + GetEntryPath(entry));
+            XmlElement? root = doc.DocumentElement;
+            XmlNode? entryNode = root.SelectSingleNode(GetSectionsPath(section) + "/" + GetEntryPath(entry));
             if (entryNode == null)
                 return;
 
@@ -403,23 +403,23 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///   Note: If <see cref="XmlBased.Buffering" /> is enabled, the section is not removed from the
         ///   XML file until the buffer is flushed (or closed). </para></remarks>
         /// <seealso cref="RemoveEntry" />
-        public override void RemoveSection(string section)
+        public override void RemoveSection(string? section)
         {
             VerifyNotReadOnly();
             VerifyAndAdjustSection(ref section);
 
             // Verify the document exists
-            XmlDocument doc = GetXmlDocument();
+            XmlDocument? doc = GetXmlDocument();
             if (doc == null)
                 return;
 
             // Get the root node, if it exists
-            XmlElement root = doc.DocumentElement;
+            XmlElement? root = doc.DocumentElement;
             if (root == null)
                 return;
 
             // Get the section's node, if it exists
-            XmlNode sectionNode = root.SelectSingleNode(GetSectionsPath(section));
+            XmlNode? sectionNode = root.SelectSingleNode(GetSectionsPath(section));
             if (sectionNode == null)
                 return;
 
@@ -446,7 +446,7 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///	  Parse error in the XML being loaded from the file. </exception>
         /// <seealso cref="Profile.HasEntry" />
         /// <seealso cref="GetSectionNames" />
-        public override string[] GetEntryNames(string section)
+        public override string[]? GetEntryNames(string? section)
         {
             // Verify the section exists
             if (!HasSection(section))
@@ -454,11 +454,11 @@ namespace AGenius.UsefulStuff.AMS.Profile
 
             VerifyAndAdjustSection(ref section);
 
-            XmlDocument doc = GetXmlDocument();
-            XmlElement root = doc.DocumentElement;
+            XmlDocument? doc = GetXmlDocument();
+            XmlElement? root = doc.DocumentElement;
 
             // Get the entry nodes
-            XmlNodeList entryNodes = root.SelectNodes(GetSectionsPath(section) + "/entry[@name]");
+            XmlNodeList? entryNodes = root.SelectNodes(GetSectionsPath(section) + "/entry[@name]");
             if (entryNodes == null)
                 return null;
 
@@ -483,20 +483,20 @@ namespace AGenius.UsefulStuff.AMS.Profile
         ///	  Parse error in the XML being loaded from the file. </exception>
         /// <seealso cref="Profile.HasSection" />
         /// <seealso cref="GetEntryNames" />
-        public override string[] GetSectionNames()
+        public override string[]? GetSectionNames()
         {
             // Verify the document exists
-            XmlDocument doc = GetXmlDocument();
+            XmlDocument? doc = GetXmlDocument();
             if (doc == null)
                 return null;
 
             // Get the root node, if it exists
-            XmlElement root = doc.DocumentElement;
+            XmlElement? root = doc.DocumentElement;
             if (root == null)
                 return null;
 
             // Get the section nodes
-            XmlNodeList sectionNodes = root.SelectNodes("section[@name]");
+            XmlNodeList? sectionNodes = root.SelectNodes("section[@name]");
             if (sectionNodes == null)
                 return null;
 
